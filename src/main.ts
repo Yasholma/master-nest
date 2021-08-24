@@ -1,9 +1,14 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(2020);
-  console.log(`Master Nest running on localhost:2020`);
+  const configService = new ConfigService();
+  const PORT = configService.get('PORT');
+
+  await app.listen(PORT);
+
+  console.log(`Master Nest running on http://localhost:${PORT}`);
 }
 bootstrap();
