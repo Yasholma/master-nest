@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  await app.listen(2020);
+  console.log(`Master Nest running on localhost:2020`);
 }
 bootstrap();
