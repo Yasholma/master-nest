@@ -8,6 +8,8 @@ import { DatabaseModule } from './database/database.module';
 import { UserModule } from './user/user.module';
 import { AuthenticationService } from './authentication/authentication.service';
 import { AuthenticationModule } from './authentication/authentication.module';
+import { APP_FILTER } from '@nestjs/core';
+import { ExceptionsLoggerFilter } from './exceptions/index.exceptions';
 
 @Module({
   imports: [
@@ -30,6 +32,10 @@ import { AuthenticationModule } from './authentication/authentication.module';
     AuthenticationModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthenticationService],
+  providers: [
+    { provide: APP_FILTER, useClass: ExceptionsLoggerFilter },
+    AppService,
+    AuthenticationService,
+  ],
 })
 export class AppModule {}
