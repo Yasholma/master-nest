@@ -8,13 +8,16 @@ import {
   Put,
   UseFilters,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JwtAthenticationGuard } from 'src/authentication/guards/jwt-authentication.guard';
 import { ExceptionsLoggerFilter } from 'src/exceptions/index.exceptions';
+import { ExcludeNullInterceptor } from 'src/interceptors/exclude-null.interceptor';
 import { CreatePostDTO, FindOneParams, UpdatePostDTO } from './dtos';
 import { PostsService } from './posts.service';
 
 @Controller('posts')
+@UseInterceptors(ExcludeNullInterceptor)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
