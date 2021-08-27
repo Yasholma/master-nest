@@ -37,3 +37,9 @@ export class PostNotFoundException extends NotFoundException {
     super(`Post with id ${postId} not found`);
   }
 }
+
+export class CategoryNotFoundException extends NotFoundException {
+  constructor(categoryId: number) {
+    super(`Category with id ${categoryId} not found`);
+  }
+}

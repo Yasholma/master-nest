@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
@@ -8,6 +9,7 @@ import {
   Res,
   SerializeOptions,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthenticationService } from './authentication.service';
@@ -16,10 +18,10 @@ import { JwtAthenticationGuard } from './guards/jwt-authentication.guard';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
 import { RequestWithUser } from './interfaces';
 
-// @UseInterceptors(ClassSerializerInterceptor)
 @Controller('authentication')
+@UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions({
-  strategy: 'excludeAll',
+  strategy: 'exposeAll',
 })
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
@@ -27,9 +29,7 @@ export class AuthenticationController {
   @UseGuards(JwtAthenticationGuard)
   @Get()
   async authenticate(@Req() request: RequestWithUser) {
-    const user = request.user;
-    user.password = undefined;
-    return user;
+    return request.user;
   }
 
   @Post('register')

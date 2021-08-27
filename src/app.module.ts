@@ -10,6 +10,7 @@ import { AuthenticationService } from './authentication/authentication.service';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { APP_FILTER } from '@nestjs/core';
 import { ExceptionsLoggerFilter } from './exceptions/index.exceptions';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ExceptionsLoggerFilter } from './exceptions/index.exceptions';
     DatabaseModule,
     UserModule,
     AuthenticationModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [

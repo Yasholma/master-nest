@@ -6,18 +6,17 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseFilters,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { JwtAthenticationGuard } from 'src/authentication/guards/jwt-authentication.guard';
+import { RequestWithUser } from 'src/authentication/interfaces';
 import { ExceptionsLoggerFilter } from 'src/exceptions/index.exceptions';
-import { ExcludeNullInterceptor } from 'src/interceptors/exclude-null.interceptor';
 import { CreatePostDTO, FindOneParams, UpdatePostDTO } from './dtos';
 import { PostsService } from './posts.service';
 
 @Controller('posts')
-@UseInterceptors(ExcludeNullInterceptor)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
@@ -34,8 +33,11 @@ export class PostsController {
 
   @Post()
   @UseGuards(JwtAthenticationGuard)
-  async createPost(@Body() post: CreatePostDTO) {
-    return this.postsService.createPost(post);
+  async createPost(
+    @Req() request: RequestWithUser,
+    @Body() post: CreatePostDTO,
+  ) {
+    return this.postsService.createPost(post, request.user);
   }
 
   @Put(':id')
