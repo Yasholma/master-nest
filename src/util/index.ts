@@ -1,3 +1,6 @@
+import User from 'src/user/entities/user.entity';
+import * as bcrypt from 'bcryptjs';
+
 export const recursivelyStripNullValues = (value: unknown): unknown => {
   if (Array.isArray(value)) {
     return value.map(recursivelyStripNullValues);
@@ -33,3 +36,18 @@ export const mockedConfigService = {
 export const mockedJwtService = {
   sign: () => '',
 };
+
+export const mockedUser: User = {
+  id: 1,
+  email: 'user@email.com',
+  name: 'John',
+  password: 'hash',
+  address: {
+    id: 1,
+    street: 'streetName',
+    city: 'cityName',
+    country: 'countryName',
+  },
+};
+
+export { bcrypt };
