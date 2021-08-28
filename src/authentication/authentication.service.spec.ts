@@ -1,18 +1,43 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { AuthenticationService } from './authentication.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import User from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
+import { mockedConfigService, mockedJwtService } from 'src/util';
 
-describe('AuthenticationService', () => {
-  let service: AuthenticationService;
-
+describe('The AuthenticationService', () => {
+  let authenticationService: AuthenticationService;
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthenticationService],
+    const module = await Test.createTestingModule({
+      providers: [
+        UserService,
+        AuthenticationService,
+        {
+          provide: ConfigService,
+          useValue: mockedConfigService,
+        },
+        {
+          provide: JwtService,
+          useValue: mockedJwtService,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useValue: {},
+        },
+      ],
     }).compile();
-
-    service = module.get<AuthenticationService>(AuthenticationService);
+    authenticationService = await module.get<AuthenticationService>(
+      AuthenticationService,
+    );
   });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  describe('when creating a cookie', () => {
+    it('should return a string', () => {
+      const userId = 1;
+      expect(
+        typeof authenticationService.getCookieWithJwtToken(userId),
+      ).toEqual('string');
+    });
   });
 });
