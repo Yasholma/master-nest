@@ -10,7 +10,8 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAthenticationGuard } from 'src/authentication/guards/jwt-authentication.guard';
+import { JwtAuthenticationGuard } from 'src/authentication/guards/jwt-authentication.guard';
+
 import { RequestWithUser } from 'src/authentication/interfaces';
 import { ExceptionsLoggerFilter } from 'src/exceptions/index.exceptions';
 import { CreatePostDTO, FindOneParams, UpdatePostDTO } from './dtos';
@@ -32,7 +33,7 @@ export class PostsController {
   }
 
   @Post()
-  @UseGuards(JwtAthenticationGuard)
+  @UseGuards(JwtAuthenticationGuard)
   async createPost(
     @Req() request: RequestWithUser,
     @Body() post: CreatePostDTO,

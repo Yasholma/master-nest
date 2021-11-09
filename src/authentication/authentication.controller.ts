@@ -14,7 +14,7 @@ import {
 import { Response } from 'express';
 import { AuthenticationService } from './authentication.service';
 import { RegisterDTO } from './dtos';
-import { JwtAthenticationGuard } from './guards/jwt-authentication.guard';
+import { JwtAuthenticationGuard } from './guards/jwt-authentication.guard';
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
 import { RequestWithUser } from './interfaces';
 
@@ -26,7 +26,7 @@ import { RequestWithUser } from './interfaces';
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
-  @UseGuards(JwtAthenticationGuard)
+  @UseGuards(JwtAuthenticationGuard)
   @Get()
   async authenticate(@Req() request: RequestWithUser) {
     return request.user;
@@ -50,7 +50,7 @@ export class AuthenticationController {
     return user;
   }
 
-  @UseGuards(JwtAthenticationGuard)
+  @UseGuards(JwtAuthenticationGuard)
   @Post('logout')
   async logout(@Req() request: RequestWithUser, @Res() response: Response) {
     response.setHeader(
