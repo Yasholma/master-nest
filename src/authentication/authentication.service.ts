@@ -6,7 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { PostgresErrorCode } from 'src/enum';
+import { PostgresErrorCode, TokenType } from 'src/enum';
 import User from 'src/user/entities/user.entity';
 
 import { UserService } from 'src/user/user.service';
@@ -54,17 +54,36 @@ export class AuthenticationService {
     }
   }
 
-  getCookieWithJwtToken(userId: number): string {
+  getCookieWithJwtAccessToken(userId: number): string {
+    return this._getCookieWithKey(TokenType.AccessToken, userId);
+  }
+
+  getCookieWithJwtRefreshToken(userId: number): string {
+    return this._getCookieWithKey(TokenType.RefreshToken, userId);
+  }
+
+  private _getCookieWithKey(key: string, userId: number): string {
     const payload: TokenPayload = { userId };
     const token = this.jwtService.sign(payload);
 
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-      'JWT_EXPIRATION_TIME',
+    const expirationTime =
+      key === TokenType.RefreshToken
+        ? 'JWT_REFRESH_TOKEN_EXPIRATION_TIME'
+        : 'JWT_ACCESS_TOKEN_EXPIRATION_TIME';
+
+    const keyValue =
+      key === TokenType.RefreshToken ? 'Refresh' : 'Authentication';
+
+    return `${keyValue}=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+      expirationTime,
     )}`;
   }
 
-  getCookieForLogout(): string {
-    return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
+  getCookieForLogout(): string[] {
+    return [
+      'Authentication=; HttpOnly; Path=/; Max-Age=0',
+      'Refresh=; HttpOnly; Path=/; Max-Age=0',
+    ];
   }
 
   private async verifyPassword(

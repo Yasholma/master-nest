@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import { Repository } from 'typeorm';
 import { CreateUserDTO } from './dtos';
 import User from './entities/user.entity';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -128,5 +129,37 @@ export class UserService {
     }
 
     throw new NotFoundException('User with this id does not exist');
+  }
+
+  async setCurrentHashedRefreshToken(
+    refreshToken: string,
+    userId: number,
+  ): Promise<void> {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.userRepository.update(userId, { currentHashedRefreshToken });
+  }
+
+  async getUserIfRefreshTokenMatches(
+    refreshToken: string,
+    userId: number,
+  ): Promise<User> {
+    const user = await this.getById(userId);
+
+    const isRefreshTokenMatched = await bcrypt.compare(
+      refreshToken,
+      user.currentHashedRefreshToken,
+    );
+
+    if (isRefreshTokenMatched) {
+      return user;
+    }
+
+    return null;
+  }
+
+  async removeRefreshToken(userId: number) {
+    return this.userRepository.update(userId, {
+      currentHashedRefreshToken: null,
+    });
   }
 }
