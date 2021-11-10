@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseFilters,
   UseGuards,
@@ -22,7 +23,10 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  getAllPosts() {
+  getAllPosts(@Query('search') search: string) {
+    if (search) {
+      return this.postsService.searchPost(search);
+    }
     return this.postsService.getAllPosts();
   }
 
