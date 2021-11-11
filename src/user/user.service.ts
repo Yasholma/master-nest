@@ -1,5 +1,6 @@
 import {
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -9,7 +10,7 @@ import { FileService } from 'src/file/file.service';
 import PrivateFile from 'src/privateFiles/privateFile.entity';
 import { PrivateFilesService } from 'src/privateFiles/privateFiles.service';
 import { Readable } from 'stream';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { CreateUserDTO } from './dtos';
 import User from './entities/user.entity';
 import * as bcrypt from 'bcryptjs';
@@ -20,6 +21,7 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly fileService: FileService,
     private readonly privateFilesService: PrivateFilesService,
+    private connection: Connection,
   ) {}
 
   async getByEmail(email: string): Promise<User> {
@@ -78,13 +80,28 @@ export class UserService {
     const user = await this.getById(userId);
     const fileId = user.avatar?.id;
 
-    if (fileId) {
-      await this.userRepository.update(userId, {
-        ...user,
-        avatar: null,
-      });
+    const queryRunner = this.connection.createQueryRunner();
 
-      await this.fileService.deletePublicFile(fileId);
+    if (fileId) {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+        await queryRunner.manager.update(User, userId, {
+          ...user,
+          avatar: null,
+        });
+        await this.fileService.deletePublicFileWithQueryRunner(
+          fileId,
+          queryRunner,
+        );
+        await queryRunner.commitTransaction();
+      } catch (error) {
+        await queryRunner.rollbackTransaction();
+        throw new InternalServerErrorException();
+      } finally {
+        await queryRunner.release();
+      }
     }
   }
 

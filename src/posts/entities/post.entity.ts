@@ -4,6 +4,7 @@ import User from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -21,6 +22,10 @@ class Post {
   @Column()
   public content: string;
 
+  // @Column('text', { array: true, nullable: true })
+  @Column('simple-array', { nullable: true })
+  public paragraphs: string[];
+
   @Column({ nullable: true })
   @Transform(({ value }) => {
     if (!!value) {
@@ -29,6 +34,7 @@ class Post {
   })
   public category?: string;
 
+  @Index('post_authorId_index')
   @ManyToOne(() => User, (author: User) => author.posts)
   public author: User;
 

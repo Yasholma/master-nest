@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostNotFoundException } from 'src/exceptions/index.exceptions';
-import User from 'src/user/entities/user.entity';
-import { Repository, In } from 'typeorm';
+import { PaginationResult } from 'src/util/pagination.interface';
+import { Repository, In, FindManyOptions, MoreThan } from 'typeorm';
 import { CreatePostDTO, UpdatePostDTO } from './dtos';
-import Post from './entities/post.entity';
 import { PostSearchService } from './postSearch.service';
+
+import User from 'src/user/entities/user.entity';
+import Post from './entities/post.entity';
 
 @Injectable()
 export class PostsService {
@@ -14,8 +16,33 @@ export class PostsService {
     private readonly postSearchService: PostSearchService,
   ) {}
 
-  async getAllPosts(): Promise<Post[]> {
-    return this.postsRepository.find({ relations: ['author'] });
+  async getAllPosts(
+    offset?: number,
+    limit?: number,
+    startId?: number,
+  ): Promise<PaginationResult<Post[]>> {
+    const where: FindManyOptions<Post>['where'] = {};
+    let separateCount = 0;
+
+    if (startId) {
+      where.id = MoreThan(startId);
+      separateCount = await this.postsRepository.count();
+    }
+
+    const [items, count] = await this.postsRepository.findAndCount({
+      where,
+      relations: ['author'],
+      order: {
+        id: 'ASC',
+      },
+      skip: offset,
+      take: limit,
+    });
+
+    return {
+      items,
+      count: startId ? separateCount : count,
+    };
   }
 
   async getPostById(id: number): Promise<Post> {
@@ -59,18 +86,43 @@ export class PostsService {
     await this.postSearchService.remove(id);
   }
 
-  async searchPost(text: string) {
-    const results = await this.postSearchService.search(text);
-    const ids = results.map((item) => item.id);
+  async searchPost(
+    text: string,
+    offset?: number,
+    limit?: number,
+    startId?: number,
+  ): Promise<PaginationResult<Post[]>> {
+    const res = await this.postSearchService.search(
+      text,
+      offset,
+      limit,
+      startId,
+    );
+    const ids = res.items.map((item) => item.id);
 
     if (!ids.length) {
-      return [];
+      return {
+        items: [],
+        count: 0,
+      };
     }
 
-    return this.postsRepository.find({
+    const [items, count] = await this.postsRepository.findAndCount({
       where: {
         id: In(ids),
       },
     });
+
+    return {
+      items,
+      count,
+    };
+  }
+
+  async getPostsWithParagraph(paragraph: string): Promise<Post[]> {
+    return this.postsRepository.query(
+      'SELECT * FROM post WHERE $1 = ANY(paragraphs)',
+      [paragraph],
+    );
   }
 }

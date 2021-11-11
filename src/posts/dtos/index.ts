@@ -2,6 +2,7 @@ import {
   IsNotEmpty,
   IsNumberString,
   IsOptional,
+  IsString,
   MinLength,
 } from 'class-validator';
 
@@ -12,6 +13,10 @@ export class CreatePostDTO {
   @IsNotEmpty()
   @MinLength(2)
   title: string;
+
+  @IsString({ each: true })
+  @IsNotEmpty()
+  paragraphs: string[];
 }
 
 export class UpdatePostDTO {
@@ -22,6 +27,10 @@ export class UpdatePostDTO {
   @IsNotEmpty()
   @IsOptional()
   title: string;
+
+  @IsString({ each: true })
+  @IsOptional()
+  paragraphs: string[];
 }
 
 export class FindOneParams {

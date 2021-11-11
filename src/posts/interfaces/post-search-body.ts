@@ -11,3 +11,7 @@ export interface PostSearchResult {
     hits: Array<{ _source: PostSearchBody }>;
   };
 }
+
+export interface PostCountResult {
+  count: number;
+}

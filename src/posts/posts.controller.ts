@@ -15,6 +15,7 @@ import { JwtAuthenticationGuard } from 'src/authentication/guards/jwt-authentica
 
 import { RequestWithUser } from 'src/authentication/interfaces';
 import { ExceptionsLoggerFilter } from 'src/exceptions/index.exceptions';
+import { PaginationParams } from 'src/util/pagination-params';
 import { CreatePostDTO, FindOneParams, UpdatePostDTO } from './dtos';
 import { PostsService } from './posts.service';
 
@@ -23,11 +24,14 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  getAllPosts(@Query('search') search: string) {
+  getAllPosts(
+    @Query('search') search: string,
+    @Query() { offset, limit, startId }: PaginationParams,
+  ) {
     if (search) {
-      return this.postsService.searchPost(search);
+      return this.postsService.searchPost(search, offset, limit, startId);
     }
-    return this.postsService.getAllPosts();
+    return this.postsService.getAllPosts(offset, limit, startId);
   }
 
   @Get(':id')
