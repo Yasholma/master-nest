@@ -14,6 +14,7 @@ import { CategoryModule } from './category/category.module';
 import { FileModule } from './file/file.module';
 import { PrivateFilesModule } from './privateFiles/privateFiles.module';
 import { SearchModule } from './search/search.module';
+import { SubscribersModule } from './subscribers/subscribers.module';
 
 @Module({
   imports: [
@@ -35,6 +36,8 @@ import { SearchModule } from './search/search.module';
         AWS_PUBLIC_BUCKET_NAME: Joi.string().required(),
         AWS_ENDPOINT: Joi.string().required(),
         PORT: Joi.number(),
+        SUBSCRIBERS_SERVICE_HOST: Joi.string().required(),
+        SUBSCRIBERS_SERVICE_PORT: Joi.string().required(),
       }),
       isGlobal: true,
     }),
@@ -45,6 +48,7 @@ import { SearchModule } from './search/search.module';
     FileModule,
     PrivateFilesModule,
     SearchModule,
+    SubscribersModule,
   ],
   controllers: [AppController],
   providers: [
